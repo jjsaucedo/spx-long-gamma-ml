@@ -1,22 +1,12 @@
-import pandas as pd
+def enrich_with_gex(features_df, gex_df, total_gex):
+    atm_strike = gex_df.iloc[
+        (gex_df["strike"] - gex_df["strike"].mean()).abs().argsort()[:1]
+    ]["strike"].values[0]
 
-def build_long_gamma_features(options, spot_price):
-    rows = []
+    atm_gex = gex_df[gex_df["strike"] == atm_strike]["gex"].values[0]
 
-    for opt in options:
-        greeks = opt.get("greeks", {})
-        rows.append({
-            "strike": opt["strike"],
-            "iv": greeks.get("iv", 0),
-            "gamma": greeks.get("gamma", 0),
-            "delta": greeks.get("delta", 0),
-            "distance": abs(opt["strike"] - spot_price)
-        })
+    features_df["total_gex"] = total_gex
+    features_df["atm_gex"] = atm_gex
+    features_df["dealer_position"] = "NEGATIVE" if total_gex < 0 else "POSITIVE"
 
-    df = pd.DataFrame(rows)
-    df = df[df["iv"] > 0]
-
-    df["gamma_weighted"] = df["gamma"] / df["gamma"].sum()
-    df["iv_mean"] = df["iv"].mean()
-
-    return df
+    return features_df
