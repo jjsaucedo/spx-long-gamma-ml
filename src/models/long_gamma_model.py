@@ -2,8 +2,11 @@ from xgboost import XGBClassifier
 
 FEATURES = [
     "iv_mean",
-    "gamma_weighted"
+    "gamma_weighted",
+    "total_gex",
+    "atm_gex"
 ]
+
 
 def build_model():
     return XGBClassifier(
